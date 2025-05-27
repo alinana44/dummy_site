@@ -119,10 +119,47 @@ st.markdown("""
         text-align: center;
         margin: 0.5rem;
     }
-    .status-active { background-color: #ffebee !important; }
-    .status-enroute { background-color: #e8f5e8 !important; }
-    .status-completed { background-color: #e3f2fd !important; }
-    .status-dispatched { background-color: #fff3e0 !important; }
+    .dataframe {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+    .status-active { 
+        background-color: #ffebee !important; 
+        color: #c62828 !important;
+        font-weight: bold;
+    }
+    .status-enroute { 
+        background-color: #e8f5e8 !important; 
+        color: #2e7d32 !important;
+        font-weight: bold;
+    }
+    .status-completed { 
+        background-color: #e3f2fd !important; 
+        color: #1565c0 !important;
+        font-weight: bold;
+    }
+    .status-dispatched { 
+        background-color: #fff3e0 !important; 
+        color: #ef6c00 !important;
+        font-weight: bold;
+    }
+    /* Enhanced table styling */
+    .stDataFrame {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    /* Make all text in dataframes darker for better visibility */
+    .stDataFrame td {
+        color: #333333 !important;
+        font-weight: 500;
+    }
+    .stDataFrame th {
+        background-color: #f1f3f4 !important;
+        color: #1f1f1f !important;
+        font-weight: bold;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -137,7 +174,7 @@ st.sidebar.markdown("""
 st.sidebar.markdown("---")
 option = st.sidebar.radio(
     "Select a view:", 
-    ["🚑 Live Operations Map", "🏥 Fleet Management", "📞 Call Center Logs", "📊 Case Database", "📈 Analytics Overview"]
+    ["🚑 Live Operations Map", "🏥 Fleet Management", "📞 Call Center Logs", "📊 Case Database"]
 )
 
 # System status in sidebar
@@ -334,13 +371,13 @@ elif option == "📞 Call Center Logs":
     # Enhanced call logs with priority
     def style_call_logs(row):
         if row.status == "En Route":
-            return ["background-color: #c8e6c9"] * len(row)
+            return ["background-color: #c8e6c9; color: #2e7d32; font-weight: bold"] * len(row)
         elif row.status == "Dispatched":
-            return ["background-color: #fff3e0"] * len(row)
+            return ["background-color: #fff3e0; color: #ef6c00; font-weight: bold"] * len(row)
         elif row.status == "Completed":
-            return ["background-color: #e3f2fd"] * len(row)
+            return ["background-color: #e3f2fd; color: #1565c0; font-weight: bold"] * len(row)
         else:
-            return [""] * len(row)
+            return ["color: #333333; font-weight: 500"] * len(row)
     
     st.subheader("📋 Today's Emergency Calls")
     st.dataframe(
@@ -396,42 +433,19 @@ elif option == "📊 Case Database":
     # Enhanced styling for case database
     def highlight_cases(row):
         if row.Status == "Active" and row.Priority == "High":
-            return ["background-color: #ffcdd2"] * len(row)  # Red for active high priority
+            return ["background-color: #ffcdd2; color: #c62828; font-weight: bold"] * len(row)  # Red for active high priority
         elif row.Status == "Active":
-            return ["background-color: #fff3e0"] * len(row)  # Orange for active
+            return ["background-color: #fff3e0; color: #ef6c00; font-weight: bold"] * len(row)  # Orange for active
+        elif row.Status == "Completed":
+            return ["background-color: #e8f5e8; color: #2e7d32; font-weight: bold"] * len(row)  # Green for completed
         else:
-            return [""] * len(row)
+            return ["color: #333333; font-weight: 500"] * len(row)
     
     st.subheader("📋 Case Records")
     st.dataframe(
         filtered_data.style.apply(highlight_cases, axis=1),
         use_container_width=True
     )
-
-elif option == "📈 Analytics Overview":
-    st.markdown('<div class="main-header"><h1>📈 Emergency Services Analytics</h1><p>Performance metrics and operational insights</p></div>', unsafe_allow_html=True)
-    
-    # Key performance indicators
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("⏱️ Avg Response Time", "4.2 min", delta=-0.3)
-    with col2:
-        st.metric("📞 Call Volume Today", len(call_logs), delta=3)
-    with col3:
-        success_rate = (completed_count / len(call_logs)) * 100
-        st.metric("✅ Success Rate", f"{success_rate:.1f}%", delta=2.1)
-    with col4:
-        fleet_utilization = (len(ambulances_enroute) / (len(ambulances_enroute) + len(available_ambulances))) * 100
-        st.metric("🚑 Fleet Utilization", f"{fleet_utilization:.1f}%", delta=5.2)
-    
-    # Quick stats
-    st.subheader("📊 Today's Summary")
-    summary_data = {
-        "Metric": ["Total Emergency Calls", "Active Cases", "Ambulances Deployed", "Average ETA", "High Priority Cases"],
-        "Value": [len(call_logs), len(ongoing_cases), len(ambulances_enroute), f"{avg_eta:.1f} min", high_priority],
-        "Status": ["Normal", "Elevated", "Normal", "Good", "Attention"]
-    }
-    st.dataframe(pd.DataFrame(summary_data), use_container_width=True)
 
 # Enhanced footer
 st.sidebar.markdown("---")
